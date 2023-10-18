@@ -28,18 +28,20 @@ class MainActivity : ComponentActivity() {
         setContent {
             val vm: MainViewModel = viewModel()
             val state: State<ViewState> = vm.stateFlow.collectAsState()
+//            val command: State<Command> = vm.commandFlow.collectAsState()
+
             ApplicationTheme {
                 Surface(
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
                     when (val value = state.value) {
-                        is ViewState.Page1.DisplayText ->
+                        is ViewState.Page1 ->
                             Greeting(value.text) {
                                 vm.intend(Intent.ClickTheButton)
                             }
 
-                        is ViewState.Page2.DisplayText ->
+                        is ViewState.Page2 ->
                             Page2(value.text) {
                                 vm.intend(Intent.ClickTheButton)
                             }

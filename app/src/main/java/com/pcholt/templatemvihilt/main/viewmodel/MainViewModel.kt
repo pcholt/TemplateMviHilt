@@ -4,16 +4,15 @@ import com.pcholt.templatemvihilt.MviViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.scopes.ViewModelScoped
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
 class MainViewModel @Inject constructor(reducer: MainReducer, mapper: MainMapper) :
-    MviViewModel<Intent, State, ViewState>(reducer, mapper, State.initial)
+    MviViewModel<Intent, State, ViewState, Command>(reducer, mapper, State.initial)
 
 @ViewModelScoped
 class MainReducer @Inject constructor() :
-    MviViewModel.Reducer<Intent, State>() {
+    MviViewModel.Reducer<Intent, State, Command>() {
 
     override fun invoke(state: State, intent: Intent) =
         when (intent) {
@@ -22,9 +21,10 @@ class MainReducer @Inject constructor() :
                     count = state.count + 1,
                     pageNumber = when (state.pageNumber) {
                         1 -> {
-                            scope.launch {
-                                delay(1000)
+                            launch {
+                                delay(3000)
                                 asyncIntent(Intent.DelayComplete)
+                                command(Command.ShowToast("A toast"))
                             }
                             2
                         }
@@ -47,8 +47,8 @@ class MainReducer @Inject constructor() :
 class MainMapper @Inject constructor() : MviViewModel.Mapper<State, ViewState> {
     override fun invoke(state: State) =
         when (state.pageNumber) {
-            1 -> ViewState.Page1.DisplayText("STATE A ${state.count}")
-            2 -> ViewState.Page2.DisplayText("STATE B ${state.count}")
+            1 -> ViewState.Page1("STATE A ${state.count}")
+            2 -> ViewState.Page2("STATE B ${state.count}")
             else -> ViewState.Unknown
         }
 }
@@ -56,6 +56,10 @@ class MainMapper @Inject constructor() : MviViewModel.Mapper<State, ViewState> {
 sealed interface Intent {
     data object DelayComplete : Intent
     data object ClickTheButton : Intent
+}
+
+sealed interface Command {
+    data class ShowToast(val text: String) : Command
 }
 
 data class State(
@@ -70,15 +74,11 @@ data class State(
 sealed interface ViewState {
     data object Unknown : ViewState
 
-    sealed interface Page1 : ViewState {
-        data class DisplayText(
-            val text: String
-        ) : Page1
-    }
+    data class Page1(
+        val text: String
+    ) : ViewState
 
-    sealed interface Page2 : ViewState {
-        data class DisplayText(
-            val text: String
-        ) : Page2
-    }
+    data class Page2(
+        val text: String
+    ) : ViewState
 }
