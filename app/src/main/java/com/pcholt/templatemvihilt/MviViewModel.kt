@@ -21,8 +21,10 @@ abstract class MviViewModel<I, S, VS, C>(
 ) : ViewModel() {
 
     private val intentChannel = Channel<I>(1).also {
-        reducer.asyncIntentChannel = it
-        reducer.scope = viewModelScope
+        with (reducer) {
+            asyncIntentChannel = it
+            scope = viewModelScope
+        }
     }
     private val _commandFlow = MutableSharedFlow<C>().also {
         reducer.commandChannel = it
@@ -63,5 +65,6 @@ abstract class MviViewModel<I, S, VS, C>(
                 block()
             }
         }
+
     }
 }
