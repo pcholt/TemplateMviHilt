@@ -16,24 +16,22 @@ class MainReducer @Inject constructor() :
 
     override fun invoke(state: State, intent: Intent) =
         when (intent) {
-            Intent.ClickTheButton -> {
-                State(
-                    count = state.count + 1,
-                    pageNumber = when (state.pageNumber) {
-                        1 -> {
-                            launch {
-                                delay(3000)
-                                asyncIntent(Intent.DelayComplete)
-                                command(Command.ShowToast("A toast"))
-                            }
-                            2
+            Intent.ClickTheButton -> State(
+                count = state.count + 1,
+                pageNumber = when (state.pageNumber) {
+                    1 -> {
+                        launch {
+                            command(Command.ShowToast("A toast"))
+                            delay(3000)
+                            asyncIntent(Intent.DelayComplete)
                         }
-
-                        2 -> 1
-                        else -> 1
+                        2
                     }
-                )
-            }
+
+                    2 -> 1
+                    else -> 1
+                }
+            )
 
             is Intent.DelayComplete -> State(
                 count = state.count + 1,
